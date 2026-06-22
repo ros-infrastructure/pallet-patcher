@@ -9,6 +9,8 @@ on:  # yamllint disable-line rule:truthy
 jobs:
   pytest:
     uses: ros-infrastructure/ci/.github/workflows/pytest.yaml@main
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   sphinx_documentation:
     runs-on: ubuntu-latest
     steps:

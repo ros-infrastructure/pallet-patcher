@@ -1,7 +1,7 @@
 pallet-patcher
 ==============
 
-|build| |pypi|
+|build| |coverage| |pypi|
 
 *Tools for working with curated collections of Cargo packages*
 
@@ -70,7 +70,9 @@ Output:
     package = 'pkg'
     path = '/usr/share/cargo/registry/pkg'
 
-.. |build| image:: https://img.shields.io/github/actions/workflow/status/cottsay/pallet-patcher/ci.yaml?branch=main&event=push
-   :target: https://github.com/cottsay/pallet-patcher/actions/workflows/ci.yaml?query=branch%3Amain+event%3Apush
+.. |build| image:: https://img.shields.io/github/actions/workflow/status/ros-infrastructure/pallet-patcher/ci.yaml?branch=main&event=push
+   :target: https://github.com/ros-infrastructure/pallet-patcher/actions/workflows/ci.yaml?query=branch%3Amain+event%3Apush
+.. |coverage| image:: https://img.shields.io/codecov/c/github/ros-infrastructure/pallet-patcher/main
+   :target: https://app.codecov.io/gh/ros-infrastructure/pallet-patcher/branch/main
 .. |pypi| image:: https://img.shields.io/pypi/v/pallet-patcher
    :target: https://pypi.org/project/pallet-patcher/

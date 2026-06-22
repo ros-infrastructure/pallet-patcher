@@ -8,7 +8,7 @@ First off, thank you for considering contribution to `pallet-patcher`.
 Reporting Bugs and Requesting Features
 ======================================
 
-If you encounter a bug or have a feature request, please `open an issue <https://github.com/cottsay/pallet-patcher/issues>`_ on our GitHub repository. Before opening a new issue, please check to see if a similar one has already been reported.
+If you encounter a bug or have a feature request, please `open an issue <https://github.com/ros-infrastructure/pallet-patcher/issues>`_ on our GitHub repository. Before opening a new issue, please check to see if a similar one has already been reported.
 
 When reporting a bug, please include as much detail as possible, including:
 
