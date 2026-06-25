@@ -44,7 +44,7 @@ def _parse_cargo_specifier(spec_str: str) -> SpecifierSet:
         clean_spec = clean_spec[1:]
 
     # 4. Handle "Bare" / Caret versions
-    if clean_spec and clean_spec[0].isdigit():
+    if clean_spec and clean_spec[0].isdigit() and '*' not in clean_spec:
         parts = clean_spec.split('.')
         try:
             major = int(parts[0])
