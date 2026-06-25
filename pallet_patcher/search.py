@@ -106,7 +106,7 @@ def compose(dependencies, search_paths, *, seeds=None):
             # core {'version': '1.0.0',
             #    'optional': True, 'package': 'rustc-std-workspace-core'}
             name = specifications.get('package', name)
-            version_spec = specifications.get('version', name)
+            version_spec = specifications.get('version', '*')
         else:
             version_spec = specifications
 
