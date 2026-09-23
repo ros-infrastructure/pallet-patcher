@@ -1,0 +1,4 @@
+[package]
+name = "vend-b"
+version = "1.0.0"
+publish = false

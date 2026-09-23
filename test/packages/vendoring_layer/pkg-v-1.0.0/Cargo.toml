@@ -1,0 +1,7 @@
+[package]
+name = "pkg-v"
+version = "1.0.0"
+publish = false
+
+[dependencies]
+vend-a = "1.0.0"

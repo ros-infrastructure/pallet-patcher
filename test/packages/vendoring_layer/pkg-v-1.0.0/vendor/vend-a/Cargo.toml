@@ -1,0 +1,7 @@
+[package]
+name = "vend-a"
+version = "1.0.0"
+publish = false
+
+[dependencies]
+vend-b = "1.0.0"

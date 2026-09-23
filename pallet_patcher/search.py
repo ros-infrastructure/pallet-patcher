@@ -89,6 +89,26 @@ def build_index(seeds, search_paths):
     return registered
 
 
+def get_vendored_registry(location):
+    """
+    Get the crates a package ships vendored alongside its own manifest.
+
+    A package which cannot source a dependency from the platform ships it in a
+    'vendor' directory next to its manifest, as produced by 'cargo vendor'.
+    That directory holds the package's whole transitive closure, flattened.
+
+    :param location: Directory the package's manifest resides in
+    :type location: Path
+
+    :returns: Crates the package vendored, or None when it vendored none
+    :rtype: tuple or None
+    """
+    vendor_path = location / 'vendor'
+    if not vendor_path.is_dir():
+        return None
+    return _get_available_crates(vendor_path)
+
+
 def derive_name_and_spec(name, specifications):
     """
     Resolve the crate name and version specifier for a dependency entry.
@@ -157,9 +177,11 @@ def compose(dependencies, search_paths, *, seeds=None):
     composition = {}
     solved_specifiers = {}
 
-    queue = list(dependencies)
+    # Each entry carries the single vendored registry in scope for it, if any,
+    # see the subtree handling below
+    queue = [(name, spec, None) for name, spec in dependencies]
     while queue:
-        name, specifications = queue.pop(0)
+        name, specifications, vendored = queue.pop(0)
         name, version_spec = derive_name_and_spec(name, specifications)
 
         # If we already parsed a version_spec, do not repeat that
@@ -170,7 +192,15 @@ def compose(dependencies, search_paths, *, seeds=None):
         # Do not search again for versions specifiers that we already looked up
         solved_specifiers[name+str(version_spec)] = True
 
-        found = find_candidate(name, version_spec, registered)
+        # Fall back to the vendored registry of the crate this dependency
+        # belongs to, and only that one, so a crate from a search path still
+        # wins and one package's vendored copies cannot satisfy another's
+        if vendored is None:
+            index = registered
+        else:
+            index = [*registered, vendored]
+
+        found = find_candidate(name, version_spec, index)
         if found is None:
             # We rely on cargo to pull from its default registry (crates.io)
             # if we don't find a dependency locally.
@@ -183,8 +213,16 @@ def compose(dependencies, search_paths, *, seeds=None):
         # Add the dependencies of the pkg to the list of packages that we
         # need to find afterwards
         plain_deps, build_deps, _ = get_dependencies(manifest, location)
-        queue.extend(plain_deps.items())
-        queue.extend(build_deps.items())
+
+        # A crate which vendored its dependencies supplies them to everything
+        # below it, because 'cargo vendor' flattens the whole transitive
+        # closure into one directory. A crate which vendored none keeps
+        # resolving against whatever its parent was using
+        crate_vendored = get_vendored_registry(location)
+        subtree = crate_vendored if crate_vendored is not None else vendored
+
+        queue.extend((n, s, subtree) for n, s in plain_deps.items())
+        queue.extend((n, s, subtree) for n, s in build_deps.items())
 
         # We also add the raw pkgname to the composition, because patches
         # don't support adding pkgname+version as part of the patch name

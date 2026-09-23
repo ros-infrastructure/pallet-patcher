@@ -176,3 +176,44 @@ def test_pkgname_with_prerelease_works():
     # We are testing here that Version saves the the dep with the name
     # we expect
     assert 'wasi::0.11.1+wasi.snapshot.preview1' in composition
+
+
+def test_vendored_registry_is_scoped_to_its_own_subtree():
+    # pkg-v ships its dependencies vendored beside it, flattened the way
+    # 'cargo vendor' produces them: vend-a is a direct dependency, vend-b is
+    # a dependency of vend-a, and both sit at the top of pkg-v's vendor dir.
+    dependencies = [
+        ('pkg-v', '*'),
+    ]
+    search_paths = (
+        _PACKAGES_PATH / 'vendoring_layer',
+    )
+
+    composition = compose(dependencies, search_paths)
+
+    # the vendored crates are reachable, including the one which is only
+    # needed transitively and whose own parent vendored nothing
+    assert set(composition) == {
+        'pkg-v::1.0.0', 'vend-a::1.0.0', 'vend-b::1.0.0'}, f'{composition}'
+
+    # and they resolve out of pkg-v's vendor directory, not the search path
+    _, location, _ = composition['vend-b::1.0.0']
+    assert location.parent.name == 'vendor', f'{location}'
+
+
+def test_vendored_registry_is_not_visible_to_other_packages():
+    # pkg-e comes from a different search path and vendors nothing, so the
+    # crates pkg-v vendored must not be candidates for it
+    dependencies = [
+        ('pkg-e', '*'),
+        ('vend-a', '*'),
+    ]
+    search_paths = (
+        _PACKAGES_PATH / 'upper_layer',
+        _PACKAGES_PATH / 'lower_layer',
+        _PACKAGES_PATH / 'vendoring_layer',
+    )
+
+    composition = compose(dependencies, search_paths)
+
+    assert 'vend-a::1.0.0' not in composition, f'{composition}'
